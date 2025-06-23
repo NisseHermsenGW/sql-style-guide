@@ -4,6 +4,9 @@
 This style guide is based on the work of [Matt Mazur](https://mattmazur.com/) and specifically tailored to the requirements of the
 [DBT](https://www.getdbt.com/) warehouse platform. [SQLFluff](https://sqlfluff.com/) settings for a DBT project can be found in `.sqlfluff`.
 
+TODO:
+* prefix generic column names with table name, e.g. `payment_amount` instead of `amount`, to avoid confusion between similar metrics based on entity?
+
 ## Example
 
 Here's a non-trivial query to give you an idea of what this style guide looks like in the practice:
