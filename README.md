@@ -205,8 +205,56 @@ order by 2
 
 ### Annotate attributes by group
 
+For complex and/or long queries, group and annotate the table attributes by the following types:
+* `ids`, includes PK, Surrogate Keys and FKs.
+* `properties`, includes the remaining existing and derived attributes.
+
 ```sql
-TODO: add example
+-- Good
+select
+    -- ids
+    product_id,
+    supplier_id
+    
+    -- properties
+    product_name,
+    product_type,
+    product_description,
+    (price / 100.0)::float as product_price,
+
+    case
+        when type = 'jaffle' then 1
+        else 0
+    end as is_food_item,
+    
+    case
+        when type = 'beverage' then 1
+        else 0
+    end as is_drink_item
+
+from source
+
+-- Okay
+select
+    product_id,
+    supplier_id
+    product_name,
+    product_type,
+    product_description,
+    (price / 100.0)::float as product_price,
+
+    case
+        when type = 'jaffle' then 1
+        else 0
+    end as is_food_item,
+    
+    case
+        when type = 'beverage' then 1
+        else 0
+    end as is_drink_item
+
+from source
+
 ```
 
 ### `select *`
@@ -808,10 +856,14 @@ group by signup_year
 ### Aligning case/when statements
 
 Each `when` should be on its own line (nothing on the `case` line) and should be indented one level deeper than the `case` line. The `then` can be on the same line or on its own line below it, just aim to be consistent.
+Furthermore, each case statement should be surrounded by whitelines for readability.
 
 ```sql
 -- Good
 select
+    event_id,
+    location,
+    
     case
         when event_name = 'viewed_homepage' then 'Homepage'
         when event_name = 'viewed_editor' then 'Editor'
@@ -822,6 +874,9 @@ from events
 
 -- Good too
 select
+    event_id,
+    location,
+    
     case
         when event_name = 'viewed_homepage'
             then 'Homepage'
@@ -834,6 +889,8 @@ from events
 
 -- Bad 
 select
+    event_id,
+    location,
     case when event_name = 'viewed_homepage' then 'Homepage'
         when event_name = 'viewed_editor' then 'Editor'
         else 'Other'        
