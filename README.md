@@ -1,15 +1,6 @@
 
-# Mazur's SQL Style Guide
-
-Howdy! I'm [Matt Mazur](https://mattmazur.com/) and I'm a data analyst who has worked at several startups to help them use data to grow their businesses. This guide is an attempt to document my preferences for formatting SQL in the hope that it may be of some use to others. If you or your team do not already have a SQL style guide, this may serve as a good starting point which you can adopt and update based on your preferences. 
-
-Also, I'm a strong believer in having [Strong Opinions, Weakly Held](https://medium.com/@ameet/strong-opinions-weakly-held-a-framework-for-thinking-6530d417e364) so if you disagree with any of this, [drop me a note](https://mattmazur.com/contact/), I'd love to discuss it.
-
-You may also enjoy my [LookML Style Guide](https://github.com/mattm/lookml-style-guide) or my [blog](https://mattmazur.com/category/analytics/) where I write about analytics and data analysis.
-
-Also, if you're interested in continuing to level up your technical skills, **check out [Emergent Mind](https://www.emergentmind.com/?utm_source=sqlstyle)**, an AI research asssistant I'm working on helps you discover and learn about cutting-edge computer science research.
-
-Simplified Chinese version here: [中文版](https://github.com/huangxinping/sql-style-guide/blob/zh-cn/README.md)
+# SQL style guide
+This style guide is based on the work of [Matt Mazur](https://mattmazur.com/) and specifically tailored to the requirements of the [DBT](https://www.getdbt.com/) warehouse platform.
 
 ## Example
 
@@ -33,7 +24,7 @@ support_interest as (
         conversation.email,
         conversation.created_at as expressed_interest_at
     from helpscout.conversation
-    inner join helpscout.conversation_tag on conversation.id = conversation_tag.conversation_id
+    inner join helpscout.conversation_tag using(conversation_id)
     where 
         conversation_tag.tag = 'beacon-interest'
 
