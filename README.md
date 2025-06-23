@@ -10,8 +10,13 @@ Here's a non-trivial query to give you an idea of what this style guide looks li
 with hubspot_interest as (
 
     select
+        -- ids
+        contact_id,
+
+        -- properties
         email,
         timestamp_millis(property_beacon_interest) as expressed_interest_at
+    
     from hubspot.contact
     where 
         property_beacon_interest is not null
@@ -20,9 +25,14 @@ with hubspot_interest as (
 
 support_interest as (
 
-    select 
+    select
+        -- ids
+        conversation.conversation_id,
+
+        -- properties
         conversation.email,
         conversation.created_at as expressed_interest_at
+
     from helpscout.conversation
     inner join helpscout.conversation_tag using(conversation_id)
     where 
@@ -40,7 +50,7 @@ combined_interest as (
 
 first_interest as (
 
-    select 
+    select
         email,
         min(expressed_interest_at) as expressed_interest_at
     from combined_interest
