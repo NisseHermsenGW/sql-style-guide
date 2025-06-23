@@ -1,6 +1,8 @@
 
 # SQL style guide
-This style guide is based on the work of [Matt Mazur](https://mattmazur.com/) and specifically tailored to the requirements of the [DBT](https://www.getdbt.com/) warehouse platform.
+
+This style guide is based on the work of [Matt Mazur](https://mattmazur.com/) and specifically tailored to the requirements of the
+[DBT](https://www.getdbt.com/) warehouse platform. [SQLFluff](https://sqlfluff.com/) settings for a DBT project can be found in `.sqlfluff`.
 
 ## Example
 
@@ -18,6 +20,7 @@ with hubspot_interest as (
         timestamp_millis(property_beacon_interest) as expressed_interest_at
     
     from hubspot.contact
+    
     where 
         property_beacon_interest is not null
 
@@ -35,7 +38,8 @@ support_interest as (
 
     from helpscout.conversation
     inner join helpscout.conversation_tag using(conversation_id)
-    where 
+    
+    where
         conversation_tag.tag = 'beacon-interest'
 
 ), 
@@ -60,6 +64,67 @@ first_interest as (
 
 select * from first_interest
 ```
+
+In addition, here's a example for a DBT project (including [Jinja](https://jinja.palletsprojects.com/en/stable/) invocation):
+
+```sql
+with customers as (
+
+    select * from {{ ref('stg_jaffle_shop__customers') }}
+
+),
+
+orders as (
+
+    select * from {{ ref('stg_jaffle_shop__orders') }}
+
+),
+
+orders_grouped_by_customer as (
+
+    select
+        -- ids
+        customer_id,
+
+        -- properties
+        min(order_date) as first_order_date,
+        max(order_date) as most_recent_order_data,
+        count(order_id) as number_of_orders
+
+    from orders
+
+    group by 1
+
+),
+
+customers_joined_on_orders as (
+
+    select
+        -- ids
+        customers.customer_id,
+
+        -- properties
+        customers.first_name,
+        customers.last_name,
+
+        coalesce(orders_grouped_by_customer.number_of_orders, 0)
+            as number_of_orders,
+
+        orders_grouped_by_customer.first_order_date,
+        orders_grouped_by_customer.most_recent_order_data
+
+    from customers
+    left join orders_grouped_by_customer using (customer_id)
+    
+    where
+        customers.lifetime_value > 1000
+
+)
+
+select * from customers_joined_on_orders
+```
+
+
 ## Guidelines
 
 ### Use lowercase SQL
@@ -296,6 +361,7 @@ from users
 
 ### Column name conventions
 
+* ID fields should be suffixed with `_id`. For example, `customer_id`, `order_id`. **_This should be true for both PK and FK fields._**
 * Boolean fields should be prefixed with `is_`, `has_`, or `does_`. For example, `is_customer`, `has_unsubscribed`, etc.
 * Date-only fields should be suffixed with `_date`. For example, `report_date`.
 * Date+time fields should be suffixed with `_at`. For example, `created_at`, `posted_at`, etc.
@@ -318,6 +384,23 @@ select
     name,
     id,
 from users
+```
+
+### Use `using` in simple key to key joins instead of `on`:
+
+```sql
+-- Good
+select
+    ...
+from orders
+inner join customers using (customer_id)
+
+-- Bad
+select
+    ...
+from orders
+inner join customers on orders.customer_id = customers.customer_id
+
 ```
 
 ### Include `inner` for inner joins
