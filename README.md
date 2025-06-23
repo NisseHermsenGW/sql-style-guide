@@ -57,8 +57,10 @@ first_interest as (
     select
         email,
         min(expressed_interest_at) as expressed_interest_at
+    
     from combined_interest
-    group by email
+    
+    group by 1
 
 )
 
@@ -150,12 +152,14 @@ When selecting columns, always put each column name on its own line and never on
 -- Good
 select 
     id
+
 from users 
 
 -- Good
 select 
     id,
     email
+
 from users 
 
 -- Bad
@@ -167,7 +171,45 @@ select id, email
 from users 
 ```
 
-## select *
+### Put whiteline before `from`, `where` and `order` / `group by`:
+
+Group the sources, condition and grouping / ordering sections of code by adding whitelines between them.
+
+```sql
+-- Good
+select
+    customers.name,
+    sum(orders.amount) as total_large_spendings
+
+from orders
+inner join customers using (customer_id)
+
+where
+    orders.amount > 1000
+
+group 1
+order by 2
+
+-- Bad
+select
+    customers.name,
+    sum(orders.amount) as total_large_spendings
+from orders
+inner join customers using (customer_id)
+where
+    orders.amount > 1000
+group 1
+order by 2
+
+```
+
+### Annotate attributes by group
+
+```sql
+TODO: add example
+```
+
+### `select *`
 
 When selecting `*` it's fine to include the `*` next to the `select` and also fine to include the `from` on the same line, assuming no additional complexity like `where` conditions:
 
@@ -183,38 +225,38 @@ from users
 select * from users where email = 'name@example.com'
 ```
 
-## Indenting where conditions
+### Indenting where conditions
 
 Similarly, conditions should always be spread across multiple lines to maximize readability and make them easier to add to. Operators should be placed at the end of each line:
 
 ```sql
 -- Good
-select *
-from users
+select * from users
+
 where 
     email = 'example@domain.com'
 
 -- Good
-select *
-from users
+select * from users
+
 where 
     email like '%@domain.com' and 
     created_at >= '2021-10-08'
 
 -- Bad
-select *
-from users
+select * from users
+         
 where email = 'example@domain.com'
 
 -- Bad
-select *
-from users
+select * from users
+         
 where 
     email like '%@domain.com' and created_at >= '2021-10-08'
 
 -- Bad
-select *
-from users
+select * from users
+         
 where 
     email like '%@domain.com' 
     and created_at >= '2021-10-08'
@@ -229,13 +271,17 @@ Some IDEs have the ability to automatically format SQL so that the spaces after 
 select 
     id,
     email
+
 from users
+
 where 
     email like '%@gmail.com'
 
 -- Bad
 select id, email
+
   from users
+  
  where email like '%@gmail.com'
 ```
 
@@ -245,14 +291,14 @@ Some SQL dialects like BigQuery support using double quotes, but for most dialec
 
 ```sql
 -- Good
-select *
-from users
+select * from users
+         
 where 
     email = 'example@domain.com'
 
 -- Bad
-select *
-from users
+select * from users
+         
 where 
     email = "example@domain.com"
 ```
@@ -267,7 +313,9 @@ Simply because `!=` reads like "not equal" which is closer to how we'd say it ou
 -- Good
 select 
     count(*) as paying_users_count
+
 from users
+
 where 
     plan_name != 'free'
 ```
@@ -279,12 +327,14 @@ where
 select
     id,
     email
+
 from users
 
 -- Bad
 select
     id
     , email
+
 from users
 ```
 
@@ -294,14 +344,14 @@ While the commas-first style does have some practical advantages (it's easier to
 
 ```sql
 -- Good
-select *
-from users
+select * from users
+         
 where 
     id in (1, 2)
 
 -- Bad
-select *
-from users
+select * from users
+         
 where 
     id in ( 1, 2 )
 ```
@@ -310,8 +360,8 @@ where
 
 ```sql
 -- Good
-select *
-from users
+select * from users
+         
 where 
     email in (
         'user-1@example.com',
@@ -325,20 +375,16 @@ where
 
 ```sql
 -- Good
-select * 
-from users
+select * from users
 
 -- Good
-select * 
-from visit_logs
+select * from visit_logs
 
 -- Bad
-select * 
-from user
+select * from user
 
 -- Bad
-select * 
-from visitLog
+select * from visitLog
 ```
 
 ### Column names should be snake_case
@@ -349,6 +395,7 @@ select
     id,
     email,
     timestamp_trunc(created_at, month) as signup_month
+
 from users
 
 -- Bad
@@ -356,6 +403,7 @@ select
     id,
     email,
     timestamp_trunc(created_at, month) as SignupMonth
+
 from users
 ```
 
@@ -376,6 +424,7 @@ select
     id,
     name,
     created_at
+
 from users
 
 -- Bad
@@ -383,6 +432,7 @@ select
     created_at,
     name,
     id,
+
 from users
 ```
 
@@ -392,12 +442,14 @@ from users
 -- Good
 select
     ...
+
 from orders
 inner join customers using (customer_id)
 
 -- Bad
 select
     ...
+
 from orders
 inner join customers on orders.customer_id = customers.customer_id
 
@@ -412,6 +464,7 @@ Better to be explicit so that the join type is crystal clear:
 select
     users.email,
     sum(charges.amount) as total_revenue
+
 from users
 inner join charges on users.id = charges.user_id
 
@@ -419,6 +472,7 @@ inner join charges on users.id = charges.user_id
 select
     users.email,
     sum(charges.amount) as total_revenue
+
 from users
 join charges on users.id = charges.user_id
 ```
@@ -431,12 +485,14 @@ By doing it this way it makes it easier to determine if your join is going to ca
 -- Good
 select
     ...
+
 from users
 left join charges on users.id = charges.user_id
 -- primary_key = foreign_key --> one-to-many --> fanout
   
 select
     ...
+
 from charges
 left join users on charges.user_id = users.id
 -- foreign_key = primary_key --> many-to-one --> no fanout
@@ -444,6 +500,7 @@ left join users on charges.user_id = users.id
 -- Bad
 select
     ...
+
 from users
 left join charges on charges.user_id = users.id
 ```
@@ -455,32 +512,38 @@ left join charges on charges.user_id = users.id
 select
     users.email,
     sum(charges.amount) as total_revenue
+
 from users
 inner join charges on users.id = charges.user_id
-group by email
+
+group by 1
 
 -- Bad
 select
     users.email,
     sum(charges.amount) as total_revenue
+
 from users
 inner join charges
 on users.id = charges.user_id
-group by email
+
+group by 1
 ```
 
-When you have mutliple join conditions, place each one on their own indented line:
+When you have multiple join conditions, place each one on their own indented line:
 
 ```sql
 -- Good
 select
     users.email,
     sum(charges.amount) as total_revenue
+
 from users
 inner join charges on 
     users.id = charges.user_id and
     refunded = false
-group by email
+
+group by 1
 ```
 
 ### Avoid aliasing table names most of the time
@@ -492,6 +555,7 @@ It can be tempting to abbreviate table names like `users` to `u` and `charges` t
 select
     users.email,
     sum(charges.amount) as total_revenue
+
 from users
 inner join charges on users.id = charges.user_id
 
@@ -499,6 +563,7 @@ inner join charges on users.id = charges.user_id
 select
     u.email,
     sum(c.amount) as total_revenue
+
 from users u
 inner join charges c on u.id = c.user_id
 ```
@@ -507,7 +572,7 @@ Most of the time you'll want to type out the full table name.
 
 There are two exceptions:
 
-If you you need to join to a table more than once in the same query and need to distinguish each version of it, aliases are necessary.
+If you need to join to a table more than once in the same query and need to distinguish each version of it, aliases are necessary.
 
 Also, if you're working with long or ambiguous table names, it can be useful to alias them (but still use meaningful names):
 
@@ -516,6 +581,7 @@ Also, if you're working with long or ambiguous table names, it can be useful to 
 select
   companies.com_name,
   beacons.created_at
+
 from stg_mysql_helpscout__helpscout_companies companies
 inner join stg_mysql_helpscout__helpscout_beacons_v2 beacons on companies.com_id = beacons.com_id
 
@@ -523,6 +589,7 @@ inner join stg_mysql_helpscout__helpscout_beacons_v2 beacons on companies.com_id
 select
   stg_mysql_helpscout__helpscout_companies.com_name,
   stg_mysql_helpscout__helpscout_beacons_v2.created_at
+
 from stg_mysql_helpscout__helpscout_companies
 inner join stg_mysql_helpscout__helpscout_beacons_v2 on stg_mysql_helpscout__helpscout_companies.com_id = stg_mysql_helpscout__helpscout_beacons_v2.com_id
 
@@ -530,6 +597,7 @@ inner join stg_mysql_helpscout__helpscout_beacons_v2 on stg_mysql_helpscout__hel
 select
   c.com_name,
   b.created_at
+
 from stg_mysql_helpscout__helpscout_companies c
 inner join stg_mysql_helpscout__helpscout_beacons_v2 b on c.com_id = b.com_id
 ```
@@ -543,12 +611,14 @@ When there are no join involved, there's no ambiguity around which table the col
 select
     id,
     name
+
 from companies
 
 -- Bad
 select
     companies.id,
     companies.name
+
 from companies
 ```
 
@@ -559,6 +629,7 @@ But when there are joins involved, it's better to be explicit so it's clear wher
 select
     users.email,
     sum(charges.amount) as total_revenue
+
 from users
 inner join charges on users.id = charges.user_id
 
@@ -566,6 +637,7 @@ inner join charges on users.id = charges.user_id
 select
     email,
     sum(amount) as total_revenue
+
 from users
 inner join charges on users.id = charges.user_id
 
@@ -577,24 +649,30 @@ inner join charges on users.id = charges.user_id
 -- Good
 select 
     count(*) as total_users
+
 from users
 
 -- Bad
 select 
     count(*)
+
 from users
 
 -- Good
 select 
     timestamp_millis(property_beacon_interest) as expressed_interest_at
+
 from hubspot.contact
+
 where 
     property_beacon_interest is not null
 
 -- Bad
 select
     timestamp_millis(property_beacon_interest)
+
 from hubspot.contact
+
 where
     property_beacon_interest is not null
 ```
@@ -603,26 +681,26 @@ where
 
 ```sql
 -- Good
-select * 
-from customers 
+select * from customers 
+         
 where 
     is_cancelled = true
 
 -- Good
-select * 
-from customers 
+select * from customers 
+         
 where 
     is_cancelled = false
 
 -- Bad
-select * 
-from customers 
+select * from customers 
+
 where 
     is_cancelled
 
 -- Bad
-select * 
-from customers 
+select * from customers 
+
 where 
     not is_cancelled
 ```
@@ -635,6 +713,7 @@ select
     id,
     email,
     timestamp_trunc(created_at, month) as signup_month
+
 from users
 
 -- Bad
@@ -642,52 +721,65 @@ select
     id,
     email,
     timestamp_trunc(created_at, month) signup_month
+
 from users
 ```
 
 ### Group using column names or numbers, but not both
 
-I prefer grouping by name, but grouping by numbers is [also fine](https://blog.getdbt.com/write-better-sql-a-defense-of-group-by-1/).
+I prefer grouping by number.
 
 ```sql
 -- Good
 select 
     user_id, 
     count(*) as total_charges
-from charges
-group by user_id
 
--- Good
+from charges
+
+group by 1
+
+-- Ok
 select 
     user_id, 
     count(*) as total_charges
+
 from charges
-group by 1
+
+group by user_id
 
 -- Bad
 select
     timestamp_trunc(created_at, month) as signup_month,
     vertical,
     count(*) as users_count
+
 from users
+
 group by 1, vertical
 ```
 
 ### Take advantage of lateral column aliasing when grouping by name
+
+Only when grouping by column names.
 
 ```sql
 -- Good
 select
   timestamp_trunc(com_created_at, year) as signup_year,
   count(*) as total_companies
+
 from companies
+
 group by signup_year
 
 -- Bad
 select
   timestamp_trunc(com_created_at, year) as signup_year,
   count(*) as total_companies
+
 from companies
+
 group by timestamp_trunc(com_created_at, year)
 ```
 
@@ -698,14 +790,18 @@ group by timestamp_trunc(com_created_at, year)
 select
   timestamp_trunc(com_created_at, year) as signup_year,
   count(*) as total_companies
+
 from companies
+
 group by signup_year
 
 -- Bad
 select
   count(*) as total_companies,
   timestamp_trunc(com_created_at, year) as signup_year
+
 from mysql_helpscout.helpscout_companies
+
 group by signup_year
 ```
 
@@ -721,6 +817,7 @@ select
         when event_name = 'viewed_editor' then 'Editor'
         else 'Other'
     end as page_name
+
 from events
 
 -- Good too
@@ -732,6 +829,7 @@ select
             then 'Editor'
         else 'Other'            
     end as page_name
+
 from events
 
 -- Bad 
@@ -740,6 +838,7 @@ select
         when event_name = 'viewed_editor' then 'Editor'
         else 'Other'        
     end as page_name
+
 from events
 ```
 
@@ -761,6 +860,7 @@ with ordered_details as (
         user_id,
         name,
         row_number() over (partition by user_id order by date_updated desc) as details_rank
+    
     from billingdaddy.billing_stored_details
 
 ),
@@ -770,7 +870,9 @@ first_updates as (
     select 
         user_id, 
         name
+    
     from ordered_details
+    
     where 
         details_rank = 1
 
@@ -782,13 +884,16 @@ select * from first_updates
 select 
     user_id, 
     name
+
 from (
     select
         user_id,
         name,
         row_number() over (partition by user_id order by date_updated desc) as details_rank
+    
     from billingdaddy.billing_stored_details
 ) ranked
+
 where 
     details_rank = 1
 ```
@@ -813,6 +918,7 @@ select
     user_id,
     name,
     row_number() over (partition by user_id order by date_updated desc) as details_rank
+
 from billingdaddy.billing_stored_details
 
 -- Okay
@@ -823,6 +929,7 @@ select
         partition by user_id
         order by date_updated desc
     ) as details_rank
+
 from billingdaddy.billing_stored_details
 ```
 
@@ -833,5 +940,3 @@ This style guide was inspired in part by:
 * [Fishtown Analytics' dbt Style Guide](https://github.com/fishtown-analytics/corp/blob/master/dbt_coding_conventions.md#sql-style-guide)
 * [KickStarter's SQL Style Guide](https://gist.github.com/fredbenenson/7bb92718e19138c20591)
 * [GitLab's SQL Style Guide](https://about.gitlab.com/handbook/business-ops/data-team/sql-style-guide/)
-
-Hat-tip to Peter Butler, Dan Wyman, Simon Ouderkirk, Alex Cano, Adam Stone, Brian Kim, and Claire Carroll for providing feedback on this guide.
